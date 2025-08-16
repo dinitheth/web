@@ -42,8 +42,19 @@ function ipv4Safe(ip: ipaddr.IPv4): boolean {
 
   const range = ip.range();
 
-  // Reject private, link-local, loopback, or broadcast IPs
-  if (['private', 'linkLocal', 'loopback', 'broadcast'].includes(range)) {
+  // Reject private, link-local, loopback, broadcast, or other non-public IPs
+  if (
+    [
+      'private',
+      'linkLocal',
+      'loopback',
+      'broadcast',
+      'unspecified',
+      'multicast',
+      'carrierGradeNat',
+      'reserved',
+    ].includes(range)
+  ) {
     return false;
   }
 
@@ -61,9 +72,13 @@ function ipv6Safe(ip: ipaddr.IPv6): boolean {
     return ipv4Safe(ipv4);
   }
 
-  // Reject loopback, unspecified, link-local, or unique-local IPs
+  // Reject loopback, unspecified, link-local, unique-local, or multicast IPs
   const range = ip.range();
-  if (['loopback', 'unspecified', 'linkLocal', 'uniqueLocal'].includes(range)) {
+  if (
+    ['loopback', 'unspecified', 'linkLocal', 'uniqueLocal', 'multicast'].includes(
+      range,
+    )
+  ) {
     return false;
   }
 
