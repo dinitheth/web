@@ -65,6 +65,30 @@ describe('IP Safe Tests', () => {
     expect(ipSafe('127.0.0.1')).toBe(false);
   });
 
+  test('returns false for IPv4 multicast address', () => {
+    const mockIPv4 = {
+      kind: () => 'ipv4',
+      range: () => 'multicast',
+      toString: () => '224.0.0.1',
+      match: () => true,
+    };
+    (ipaddr.parse as jest.Mock).mockReturnValueOnce(mockIPv4);
+
+    expect(ipSafe('224.0.0.1')).toBe(false);
+  });
+
+  test('returns false for IPv4 carrier-grade NAT address', () => {
+    const mockIPv4 = {
+      kind: () => 'ipv4',
+      range: () => 'carrierGradeNat',
+      toString: () => '100.64.0.1',
+      match: () => true,
+    };
+    (ipaddr.parse as jest.Mock).mockReturnValueOnce(mockIPv4);
+
+    expect(ipSafe('100.64.0.1')).toBe(false);
+  });
+
   test('returns true for safe IPv4 address', () => {
     const mockIPv4 = {
       kind: () => 'ipv4',
@@ -87,6 +111,18 @@ describe('IP Safe Tests', () => {
     (ipaddr.parse as jest.Mock).mockReturnValueOnce(mockIPv6);
 
     expect(ipSafe('::1')).toBe(false);
+  });
+
+  test('returns false for IPv6 multicast address', () => {
+    const mockIPv6 = {
+      kind: () => 'ipv6',
+      range: () => 'multicast',
+      isIPv4MappedAddress: () => false,
+      match: () => true,
+    };
+    (ipaddr.parse as jest.Mock).mockReturnValueOnce(mockIPv6);
+
+    expect(ipSafe('ff00::1')).toBe(false);
   });
 
   test('returns true for safe IPv6 address', () => {
