@@ -1,0 +1,32 @@
+name: CI
+on:
+  push: { branches: [ main ] }
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - run: corepack enable
+      - name: Cache Yarn artifacts (optional)
+        uses: actions/cache@v4
+        with:
+          path: .yarn/cache
+          key: ${{ runner.os }}-yarncache-${{ hashFiles('yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarncache-
+
+      - run: yarn install --immutable
+      - run: yarn lint
+      - run: yarn test --ci
+      - run: yarn build
